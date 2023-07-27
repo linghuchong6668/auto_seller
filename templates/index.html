@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>饮料自动售货机</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 3px;
+        }
+
+        .button:hover {
+            opacity: 0.8;
+        }
+
+        .goods-list,
+        .cart,
+        .checkout-result {
+            margin-bottom: 20px;
+        }
+
+        .goods-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .goods-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>饮料列表</h2>
+        <div class="goods-list" id="goods-list"></div>
+
+        <hr>
+
+        <h2>购物车</h2>
+        <div class="cart" id="cart"></div>
+
+        <button class="button" onclick="checkout()">结算</button>
+
+        <hr>
+
+        <h2>结算结果</h2>
+        <div class="checkout-result" id="checkout-result"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='axios.min.js') }}"></script>
+    <script>
+        const cart = {};
+
+        // 发起 HTTP 请求获取商品数据
+        axios.get("/goods")
+          .then(response => {
+            const goodsData = response.data;
+
+            // 渲染商品列表
+            const goodsListDiv = document.getElementById('goods-list');
+            for (const drink in goodsData) {
+              const price = goodsData[drink];
+
+              const drinkDiv = document.createElement('div');
+              const drinkText = document.createTextNode(drink + ": " + price + " 元");
+              drinkDiv.appendChild(drinkText);
+
+              const addButton = document.createElement('button');
+              addButton.textContent = "加入购物车";
+              addButton.addEventListener('click', function() {
+                addToCart(drink);
+              });
+
+              drinkDiv.appendChild(addButton);
+              goodsListDiv.appendChild(drinkDiv);
+            }
+          })
+          .catch(error => {
+            console.error(error);
+          });
+
+        // 添加到购物车的逻辑
+        function addToCart(drink) {
+          if (cart.hasOwnProperty(drink)) {
+            cart[drink]++;
+          } else {
+            cart[drink] = 1;
+          }
+
+          renderCart();
+        }
+
+        // 渲染购物车
+        function renderCart() {
+          const cartDiv = document.getElementById('cart');
+          cartDiv.innerHTML = '';
+
+          for (const drink in cart) {
+            const quantity = cart[drink];
+
+            const itemDiv = document.createElement('div');
+            const itemText = document.createTextNode(drink + ": " + quantity + " 杯");
+            itemDiv.appendChild(itemText);
+
+            cartDiv.appendChild(itemDiv);
+          }
+        }
+
+        // 结算函数
+        function checkout() {
+          axios.post('/checkout', {cart:cart})
+            .then(response => {
+              const resultDiv = document.getElementById('checkout-result');
+              const total_price = response.data.total_price;
+              // 构造结果文本节点
+              const resultText = document.createTextNode(`您本次总消费金额为：${total_price}元。`);
+              // 清空结果容器并添加结果文本节点
+              resultDiv.innerHTML = '';
+              resultDiv.appendChild(resultText);
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        }
+    </script>
+</body>
+</html>
