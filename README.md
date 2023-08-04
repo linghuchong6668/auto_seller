@@ -1,3 +1,6 @@
+# 项目来源
+本项目来源于[《腾讯云 Cloud Studio 实战训练营》](https://marketing.csdn.net/p/06a21ca7f4a1843512fa8f8c40a16635)的参赛作品，该作品在腾讯云 [Cloud Studio](https://www.cloudstudio.net/?utm=csdn) 中运行无误。
+
 # 饮料自动售卖机应用程序
 
 这是一个基于Flask和MySQL的饮料自动售卖机应用程序，用户可以浏览饮料列表并将饮料添加到购物车中进行结算。
